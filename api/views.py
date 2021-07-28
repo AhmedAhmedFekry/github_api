@@ -4,7 +4,10 @@ from datetime import datetime, timedelta
 import requests
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
+from rest_framework import viewsets
 
+from rest_framework.pagination import LimitOffsetPagination
 
 def home(request):
     date= datetime.now() - timedelta(days=10)  
@@ -30,11 +33,13 @@ def home(request):
             })
     return JsonResponse({'data':result})
 
-class Home(APIView):
+class Home(APIView ):
+  
     def get(self, request, format=None):
+
         date= datetime.now() - timedelta(days=10)  
         date = date.strftime('%Y-%m-%d') 
-        url = f'https://api.github.com/search/repositories?q=created:>{date}&sort=stars&order=desc'
+        url = f'https://api.github.com/search/repositories?q=created:>{date}&sort=stars&order=desc&per_page=10'
         response = requests.get(url)
         response=response.json()
         # top three of repositories after filter
@@ -48,6 +53,7 @@ class Home(APIView):
                 continue
             result.append({
                 "html_url": i['html_url'],
+                "name": i["name"],
                 "language": {
                 "name_language": i['language'],
                 "number_of_repositories": num_of_language['total_count']
